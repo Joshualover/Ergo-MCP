@@ -63,17 +63,67 @@ export async function searchTokens(query: string) {
 
 export async function getErgoPrice() {
     try {
-        // Using a public oracle address or CoinGecko/Spectrum API?
-        // Let's use Spectrum Finance API for real-time price or CoinGecko.
-        // Or simpler: just use a known oracle box if possible, but that's complex to parse.
-        // Let's use a reliable simple API. Coingecko is good but might have rate limits.
-        // Let's try to find an oracle box on Explorer using a known Oracle Pool address?
-        // ERG/USD Oracle Pool Address: 4MN4G8c8M... (simplified)
-        // A safer bet for an MCP tool is a public price API.
         const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=ergo&vs_currencies=usd,eur');
         return response.data;
     } catch (error: any) {
-        // Fallback or error
         throw new Error(`Failed to fetch Ergo price: ${error.message}`);
+    }
+}
+
+// ── New Explorer Tools ──────────────────────────────────────────────
+
+/**
+ * Get transaction history for an Ergo address.
+ * Essential for wallets, dashboards, and audit trails.
+ */
+export async function getAddressTransactions(address: string, offset: number = 0, limit: number = 10) {
+    try {
+        const response = await axios.get(
+            `${EXPLORER_API}/addresses/${address}/transactions?offset=${offset}&limit=${limit}`
+        );
+        return response.data;
+    } catch (error: any) {
+        throw new Error(`Failed to fetch transactions for ${address}: ${error.message}`);
+    }
+}
+
+/**
+ * Get unspent boxes (UTXOs) for an Ergo address.
+ * Critical for building transactions — Ergo uses the UTXO model,
+ * so knowing available boxes is the first step in any TX construction.
+ */
+export async function getUnspentBoxes(address: string, offset: number = 0, limit: number = 30) {
+    try {
+        const response = await axios.get(
+            `${EXPLORER_API}/boxes/unspent/byAddress/${address}?offset=${offset}&limit=${limit}`
+        );
+        return response.data;
+    } catch (error: any) {
+        throw new Error(`Failed to fetch unspent boxes for ${address}: ${error.message}`);
+    }
+}
+
+/**
+ * Get current Ergo network state — chain height, latest block info,
+ * difficulty, and miner reward. Useful for dashboards and monitoring.
+ */
+export async function getNetworkState() {
+    try {
+        const blocksRes = await axios.get(
+            `${EXPLORER_API}/blocks?limit=1&sortBy=height&sortDirection=desc`
+        );
+        const latestBlock = blocksRes.data.items?.[0];
+
+        return {
+            currentHeight: latestBlock?.height,
+            latestBlockId: latestBlock?.id,
+            difficulty: latestBlock?.difficulty,
+            timestamp: latestBlock?.timestamp,
+            minerReward: latestBlock?.minerReward,
+            blockSize: latestBlock?.size,
+            transactionCount: latestBlock?.txsCount,
+        };
+    } catch (error: any) {
+        throw new Error(`Failed to fetch network state: ${error.message}`);
     }
 }

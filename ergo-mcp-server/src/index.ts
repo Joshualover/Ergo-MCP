@@ -1,4 +1,3 @@
-```typescript
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
@@ -6,7 +5,11 @@ import {
     ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
-import { getAddressBalance, getBlockHeader, getTransactionDetails, searchTokens, getErgoPrice } from "./tools.js";
+import {
+    getAddressBalance, getBlockHeader, getTransactionDetails,
+    searchTokens, getErgoPrice,
+    getAddressTransactions, getUnspentBoxes, getNetworkState
+} from "./tools.js";
 import { SkillRegistry } from "./skill_registry.js";
 import * as path from 'path';
 
@@ -19,7 +22,7 @@ const registry = new SkillRegistry(REPO_URL, GITHUB_TOKEN);
 const server = new Server(
     {
         name: "ergo-mcp-server",
-        version: "0.1.0",
+        version: "0.2.0",
     },
     {
         capabilities: {
@@ -78,6 +81,57 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 description: "Get current Ergo price in USD/EUR.",
                 inputSchema: { type: "object", properties: {}, required: [] }
             },
+            // ── New Explorer Tools ──────────────────────────────────
+            {
+                name: "get_address_transactions",
+                description: "Get transaction history for an Ergo address. Supports pagination with offset and limit.",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        address: {
+                            type: "string",
+                            description: "The Ergo address to get transaction history for.",
+                        },
+                        offset: {
+                            type: "integer",
+                            description: "Pagination offset (default 0).",
+                        },
+                        limit: {
+                            type: "integer",
+                            description: "Number of transactions to return (default 10, max 100).",
+                        },
+                    },
+                    required: ["address"],
+                },
+            },
+            {
+                name: "get_unspent_boxes",
+                description: "Get unspent boxes (UTXOs) for an Ergo address. Essential for building transactions since Ergo uses the UTXO model.",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        address: {
+                            type: "string",
+                            description: "The Ergo address to get unspent boxes for.",
+                        },
+                        offset: {
+                            type: "integer",
+                            description: "Pagination offset (default 0).",
+                        },
+                        limit: {
+                            type: "integer",
+                            description: "Number of boxes to return (default 30).",
+                        },
+                    },
+                    required: ["address"],
+                },
+            },
+            {
+                name: "get_network_state",
+                description: "Get current Ergo network state including chain height, difficulty, latest block info, and miner reward.",
+                inputSchema: { type: "object", properties: {}, required: [] }
+            },
+            // ── Dynamic Skills (from registry) ─────────────────────
             ...registry.getTools()
         ],
     };
@@ -160,6 +214,58 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
             case "get_ergo_price": {
                 const result = await getErgoPrice();
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: JSON.stringify(result, null, 2),
+                        },
+                    ],
+                };
+            }
+
+            // ── New Explorer Tool Handlers ──────────────────────────
+
+            case "get_address_transactions": {
+                const { address, offset, limit } = z
+                    .object({
+                        address: z.string(),
+                        offset: z.number().optional().default(0),
+                        limit: z.number().optional().default(10),
+                    })
+                    .parse(args);
+                const result = await getAddressTransactions(address, offset, limit);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: JSON.stringify(result, null, 2),
+                        },
+                    ],
+                };
+            }
+
+            case "get_unspent_boxes": {
+                const { address, offset, limit } = z
+                    .object({
+                        address: z.string(),
+                        offset: z.number().optional().default(0),
+                        limit: z.number().optional().default(30),
+                    })
+                    .parse(args);
+                const result = await getUnspentBoxes(address, offset, limit);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: JSON.stringify(result, null, 2),
+                        },
+                    ],
+                };
+            }
+
+            case "get_network_state": {
+                const result = await getNetworkState();
                 return {
                     content: [
                         {

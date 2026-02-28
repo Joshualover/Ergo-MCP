@@ -2,6 +2,10 @@
 import axios from 'axios';
 import * as yaml from 'js-yaml';
 import { DeployNodeSchema, deployErgoNode } from './skills/node_deployment.js';
+import {
+    BeaconDiscoverSchema, BeaconRelayInfoSchema,
+    discoverBeaconAgents, getBeaconRelayInfo
+} from './skills/beacon_discovery.js';
 
 interface SkillMetadata {
     name: string;
@@ -141,10 +145,32 @@ export class SkillRegistry {
                 inputSchema: inputSchema
             });
         }
+
+        // ── Beacon Agent Discovery (native skill) ───────────────
+        tools.push({
+            name: "discover_beacon_agents",
+            description: "Discover AI agents on the Beacon network. Filter by capability (e.g., 'ergo', 'coding') or provider (e.g., 'anthropic', 'openai'). Beacon is an open agent-to-agent (A2A) coordination protocol.",
+            inputSchema: BeaconDiscoverSchema
+        });
+
+        tools.push({
+            name: "beacon_relay_info",
+            description: "Get Beacon relay network statistics — total agents, provider breakdown, and uptime. Useful for understanding the agent ecosystem.",
+            inputSchema: BeaconRelayInfoSchema
+        });
+
         return tools;
     }
 
     public async executeSkill(name: string, args: any): Promise<any> {
+        // ── Native Beacon Skills ────────────────────────────────
+        if (name === 'discover_beacon_agents') {
+            return await discoverBeaconAgents(args);
+        }
+        if (name === 'beacon_relay_info') {
+            return await getBeaconRelayInfo();
+        }
+
         const skillKey = Array.from(this.skills.keys()).find(k => k.replace(/-/g, '_').toLowerCase() === name);
 
         if (!skillKey) {

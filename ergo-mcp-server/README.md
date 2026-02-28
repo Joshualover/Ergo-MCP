@@ -10,6 +10,9 @@ A Model Context Protocol (MCP) server for the Ergo Platform. This server provide
 - **`get_block_header`**: Fetch block headers by ID or height.
 - **`search_tokens`**: Find tokens by name/ticker.
 - **`get_ergo_price`**: Get real-time ERG price in USD and EUR via CoinGecko.
+- **`get_address_transactions`**: Get transaction history for an address with pagination.
+- **`get_unspent_boxes`**: Get unspent UTXOs for an address — essential for building transactions.
+- **`get_network_state`**: Current chain height, difficulty, latest block info, and miner reward.
 
 ### 2. Dynamic Ergo Skills (Agentic Tools)
 The server includes a **Dynamic Skill Registry** that scans the `ergo-skills-repo` to automatically load and expose capabilities.
@@ -24,6 +27,16 @@ The server includes a **Dynamic Skill Registry** that scans the `ergo-skills-rep
     - **`ergo_wasm_cryptographic_toolkit`**
     - **`nautilus_wallet_dapp_connector`**
     - These tools return their instruction manuals (from `SKILL.md`) when called, allowing an AI agent to follow the guide for manual implementation or code generation.
+
+### 3. Beacon Agent Discovery (A2A)
+Integration with the [Beacon protocol](https://github.com/Scottcjn/beacon-skill) for agent-to-agent coordination:
+
+- **`discover_beacon_agents`**: Find AI agents on the Beacon network. Filter by capability (`ergo`, `coding`, `analysis`) or provider (`anthropic`, `openai`, `google`, `xai`).
+- **`beacon_relay_info`**: Get relay network statistics — total agents, provider breakdown, uptime.
+
+Beacon is an open A2A protocol that handles agent identity, discovery, and messaging across 13+ platforms. This integration lets agents using Ergo-MCP discover other agents in the broader ecosystem.
+
+**Configuration**: Set `BEACON_ATLAS_URL` to point to any Beacon relay (default: `https://rustchain.org/beacon`). No additional dependencies required.
 
 ## Installation
 
@@ -53,6 +66,7 @@ The server automatically fetches skills from `https://github.com/Degens-World/Er
 
 - `GITHUB_TOKEN`: Add a GitHub Personal Access Token to increase API rate limits (recommended for heavy usage).
 - `GITHUB_REPO_URL`: Override the target skills repository URL.
+- `BEACON_ATLAS_URL`: Override the Beacon relay endpoint (default: `https://rustchain.org/beacon`).
 
 ```bash
 # Example with token (Linux/Mac)
@@ -87,5 +101,5 @@ node dist/index.js
 - `src/index.ts`: Main server entry point and tool registration.
 - `src/tools.ts`: Implementation of core explorer tools.
 - `src/skill_registry.ts`: Logic for dynamically loading skills from the repo.
-- `src/skills/`: Native implementations for specific skills (e.g., node deployment).
+- `src/skills/`: Native implementations for specific skills (e.g., node deployment, beacon discovery).
 - `test/`: Verification scripts.
