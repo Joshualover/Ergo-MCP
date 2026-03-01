@@ -1,91 +1,236 @@
-# Ergo MCP Server
+# Ergo MCP Server 🌐
 
-A Model Context Protocol (MCP) server for the Ergo Platform. This server provides a suite of tools for exploring the blockchain, querying real-time data, and dynamically loading "skills" (agentic workflows) from the Ergo ecosystem.
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Ergo](https://img.shields.io/badge/Ergo-Platform-orange.svg)](https://ergoplatform.org/)
+[![MCP](https://img.shields.io/badge/MCP-Protocol-green.svg)](https://modelcontextprotocol.io/)
 
-## Features
+A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for the [Ergo Platform](https://ergoplatform.org/). This server provides AI agents with powerful tools for exploring the Ergo blockchain, querying real-time data, and dynamically loading specialized skills from the Ergo ecosystem.
 
-### 1. Blockchain Explorer Tools
-- **`get_address_balance`**: Check confirmed ERG and token balances for any address.
-- **`get_transaction_details`**: Retrieve detailed information about a transaction.
-- **`get_block_header`**: Fetch block headers by ID or height.
-- **`search_tokens`**: Find tokens by name/ticker.
-- **`get_ergo_price`**: Get real-time ERG price in USD and EUR via CoinGecko.
+## 🚀 Features
 
-### 2. Dynamic Ergo Skills (Agentic Tools)
-The server includes a **Dynamic Skill Registry** that scans the `ergo-skills-repo` to automatically load and expose capabilities.
+### Blockchain Explorer Tools
 
-- **`local_ergo_node_deployment`** (Native Support):
-    - Automates the deployment of a local Ergo full node.
-    - Downloads JAR, configures API security (hashed password), and launches the process.
-    - Verified to work with `java` installed on the host.
+Interact with the Ergo blockchain through simple, powerful APIs:
 
-- **Other Skills** (Text-Based):
-    - **`ergo_appkit_code_generator`**
-    - **`ergo_wasm_cryptographic_toolkit`**
-    - **`nautilus_wallet_dapp_connector`**
-    - These tools return their instruction manuals (from `SKILL.md`) when called, allowing an AI agent to follow the guide for manual implementation or code generation.
+| Tool | Description | Example Use Case |
+|------|-------------|------------------|
+| `get_address_balance` | Check confirmed ERG and token balances | Portfolio tracking, verification |
+| `get_transaction_details` | Retrieve detailed transaction information | Transaction auditing, analysis |
+| `get_block_header` | Fetch block headers by ID or height | Block exploration, chain analysis |
+| `search_tokens` | Find tokens by name or ticker | Token discovery, market research |
+| `get_ergo_price` | Real-time ERG price in USD/EUR | Price monitoring, trading decisions |
 
-## Installation
+### Dynamic Skill Registry
 
-1.  **Clone this repository**:
-    ```bash
-    git clone https://github.com/Degens-World/Ergo-MCP.git
-    cd ergo-mcp-server
-    ```
+The server includes an intelligent **Dynamic Skill Registry** that automatically discovers and loads capabilities from the Ergo ecosystem.
 
-2.  **Install dependencies**:
-    ```bash
-    npm install
-    ```
+#### Native Skills
 
-3.  **Build the project**:
-    ```bash
-    npm run build
-    ```
+- **`local_ergo_node_deployment`** - Full local node automation
+  - Downloads and configures Ergo node JAR
+  - Sets up API security with hashed passwords
+  - Manages the node lifecycle
+  - Requires: Java runtime installed
 
-## Usage
+#### Text-Based Skills
+
+These skills provide instruction manuals for AI-guided implementation:
+
+- **`ergo_appkit_code_generator`** - Generate Ergo AppKit code
+- **`ergo_wasm_cryptographic_toolkit`** - WASM cryptography utilities
+- **`nautilus_wallet_dapp_connector`** - Nautilus wallet integration
+
+> 💡 **Note**: Text-based skills return detailed `SKILL.md` content that AI agents can use to implement features manually or generate code.
+
+---
+
+## 📦 Installation
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) 18+ 
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+- [Java](https://www.java.com/) (for local node deployment feature)
+
+### Quick Install
+
+```bash
+# Clone the repository
+git clone https://github.com/Scottcjn/Ergo-MCP.git
+cd Ergo-MCP
+
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+```
+
+---
+
+## 🎯 Usage
 
 ### Configuration
 
-The server automatically fetches skills from `https://github.com/Degens-World/Ergo-Skills`.
+The server automatically fetches skills from the [Ergo Skills repository](https://github.com/Degens-World/Ergo-Skills).
 
-**Optional Environment Variables:**
+#### Environment Variables
 
-- `GITHUB_TOKEN`: Add a GitHub Personal Access Token to increase API rate limits (recommended for heavy usage).
-- `GITHUB_REPO_URL`: Override the target skills repository URL.
+| Variable | Required | Description | Default |
+|----------|----------|-------------|---------|
+| `GITHUB_TOKEN` | No | GitHub Personal Access Token for higher API rate limits | - |
+| `GITHUB_REPO_URL` | No | Override the skills repository URL | `https://github.com/Degens-World/Ergo-Skills` |
+
+#### Example Configuration
 
 ```bash
-# Example with token (Linux/Mac)
-export GITHUB_TOKEN=ghp_yourtoken...
+# Linux/Mac
+export GITHUB_TOKEN=ghp_your_personal_access_token
+
+# Windows (PowerShell)
+$env:GITHUB_TOKEN="ghp_your_personal_access_token"
+
+# Windows (CMD)
+set GITHUB_TOKEN=ghp_your_personal_access_token
+```
+
+### Running the Server
+
+#### Production Mode
+```bash
 node dist/index.js
 ```
 
-### Running with MCP Inspector
-To test the server interactively:
+#### Development Mode
+```bash
+npm run dev
+```
+
+#### Testing with MCP Inspector
+
+The [MCP Inspector](https://github.com/modelcontextprotocol/inspector) provides an interactive UI for testing:
+
 ```bash
 npx @modelcontextprotocol/inspector node dist/index.js
 ```
 
-### Running in Production
+---
+
+## 🛠️ Development
+
+### Available Scripts
+
 ```bash
-node dist/index.js
+# Build the project
+npm run build
+
+# Run in development mode (with auto-reload)
+npm run dev
+
+# Run tests
+npm test
+
+# Type checking
+npx tsc --noEmit
+
+# Lint code
+npm run lint
 ```
 
-## Development
+### Project Structure
 
-- **Run in dev mode**:
-    ```bash
-    npm run dev
-    ```
-- **Run verification tests**:
-    ```bash
-    npm test
-    ```
+```
+Ergo-MCP/
+├── src/
+│   ├── index.ts              # Main server entry point
+│   ├── tools.ts              # Core blockchain explorer tools
+│   ├── skill_registry.ts     # Dynamic skill loading logic
+│   └── skills/
+│       └── node_deployment/  # Native skill implementations
+├── test/                     # Verification and test scripts
+├── dist/                     # Compiled JavaScript output
+├── package.json
+└── README.md
+```
 
-## Project Structure
+### Architecture
 
-- `src/index.ts`: Main server entry point and tool registration.
-- `src/tools.ts`: Implementation of core explorer tools.
-- `src/skill_registry.ts`: Logic for dynamically loading skills from the repo.
-- `src/skills/`: Native implementations for specific skills (e.g., node deployment).
-- `test/`: Verification scripts.
+```
+┌─────────────────┐
+│   MCP Client    │  (Claude, IDE, etc.)
+└────────┬────────┘
+         │ MCP Protocol
+         ▼
+┌─────────────────┐
+│  Ergo MCP Server │
+└────────┬────────┘
+         │
+    ┌────┴────┐
+    ▼         ▼
+┌────────┐ ┌──────────────┐
+│ Tools  │ │ Skill Registry│
+│ Module │ └──────┬───────┘
+└───┬────┘        │
+    │             ▼
+    │      ┌─────────────┐
+    │      │ Ergo Skills │
+    │      │   Repository│
+    │      └─────────────┘
+    ▼
+┌─────────────────┐
+│  Ergo Blockchain │
+│   API / Node     │
+└─────────────────┘
+```
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+
+### Quick Contribution Ideas
+
+- 🐛 Report bugs or issues
+- ✨ Add new blockchain explorer tools
+- 📝 Improve documentation
+- 🧪 Add more test coverage
+- 🌐 Add support for additional Ergo ecosystem tools
+
+---
+
+## 📚 Resources
+
+### Ergo Platform
+- [Ergo Documentation](https://docs.ergoplatform.com/)
+- [Ergo Explorer](https://explorer.ergoplatform.com/)
+- [Ergo Platform Website](https://ergoplatform.org/)
+
+### Model Context Protocol
+- [MCP Specification](https://modelcontextprotocol.io/)
+- [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
+
+### Related Projects
+- [Ergo Skills Repository](https://github.com/Degens-World/Ergo-Skills)
+- [Ergo AppKit](https://github.com/ergoplatform/ergo-appkit)
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- [Ergo Platform](https://ergoplatform.org/) - The blockchain that powers this ecosystem
+- [Model Context Protocol](https://modelcontextprotocol.io/) - Enabling AI-native tools
+- [Degens World](https://github.com/Degens-World) - Original project foundation
+
+---
+
+<p align="center">
+  Built with ❤️ for the Ergo and AI agent communities
+</p>
